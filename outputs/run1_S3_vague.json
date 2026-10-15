@@ -1,0 +1,128 @@
+{
+  "meta": {
+    "model": "gpt-5.6-luna",
+    "strategy": "S3",
+    "run": 1,
+    "vague_lookup": true,
+    "k": 5,
+    "reasoning_effort": "none",
+    "s2_temperature": 1.0,
+    "temperature_accepted": true,
+    "max_rounds": 12,
+    "price_in_per_1m": null,
+    "price_out_per_1m": null,
+    "saved_at": "2026-10-15T09:23:43"
+  },
+  "summary": {
+    "correct": 4,
+    "n": 5,
+    "unanswered": 0,
+    "input_tokens": 14121,
+    "output_tokens": 1213,
+    "median_seconds": 6.54,
+    "total_seconds": 31.1,
+    "cost_usd": null
+  },
+  "records": [
+    {
+      "id": "Q-01",
+      "correct": true,
+      "unanswered": false,
+      "predicted": [
+        "ossbridge",
+        4.5702
+      ],
+      "expected": [
+        "Ossbridge",
+        4.6
+      ],
+      "seconds": 7.289,
+      "input_tokens": 3069,
+      "output_tokens": 233,
+      "n_calls": 4,
+      "rounds": 4,
+      "votes": null,
+      "final_text": "Ossbridge has the higher 2025 population density by 4.5702 residents per square kilometre.\n\nANSWER: Ossbridge | 4.5702"
+    },
+    {
+      "id": "Q-09",
+      "correct": true,
+      "unanswered": false,
+      "predicted": [
+        "millbrook",
+        0.5557
+      ],
+      "expected": [
+        "Millbrook",
+        0.6
+      ],
+      "seconds": 6.012,
+      "input_tokens": 3055,
+      "output_tokens": 226,
+      "n_calls": 4,
+      "rounds": 4,
+      "votes": null,
+      "final_text": "Millbrook has the higher 2025 population density by 0.5557 residents per square kilometre.\n\nANSWER: Millbrook | 0.5557"
+    },
+    {
+      "id": "Q-13",
+      "correct": true,
+      "unanswered": false,
+      "predicted": [
+        "coldharbour",
+        4.159
+      ],
+      "expected": [
+        "Coldharbour",
+        4.16
+      ],
+      "seconds": 6.881,
+      "input_tokens": 2454,
+      "output_tokens": 269,
+      "n_calls": 3,
+      "rounds": 3,
+      "votes": null,
+      "final_text": "Coldharbour lost the largest percentage: 4.1590%.\n\nANSWER: Coldharbour | 4.1590"
+    },
+    {
+      "id": "Q-18",
+      "correct": false,
+      "unanswered": false,
+      "predicted": [
+        "millbrook",
+        40013.3914
+      ],
+      "expected": [
+        "yes",
+        40013
+      ],
+      "seconds": 4.346,
+      "input_tokens": 1867,
+      "output_tokens": 158,
+      "n_calls": 3,
+      "rounds": 3,
+      "votes": null,
+      "final_text": "Millbrook’s population grew by approximately 7.5536% from 2020 to 2025. Applying the same growth rate to 2025–2030 gives a projected population of 40,013.3914 residents, so it would exceed 40,000.\n\nANSWER: Millbrook | 40013.3914"
+    },
+    {
+      "id": "Q-20",
+      "correct": true,
+      "unanswered": false,
+      "predicted": [
+        "ashgrove",
+        2993.3428
+      ],
+      "expected": [
+        "Ashgrove",
+        2993
+      ],
+      "seconds": 6.543,
+      "input_tokens": 3676,
+      "output_tokens": 327,
+      "n_calls": 4,
+      "rounds": 4,
+      "votes": null,
+      "final_text": "Ashgrove had the largest 2025 budget per resident. It exceeded Ossbridge, the lowest, by 2993.3428 tenge per resident.\n\nANSWER: Ashgrove | 2993.3428"
+    }
+  ]
+}
