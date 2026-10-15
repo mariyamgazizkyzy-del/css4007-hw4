@@ -208,14 +208,14 @@ An answer is correct if the name equals `answer` (case-insensitive) and the numb
 
 | Run | Strategy | Correct /20 | Unanswered | Input tokens | Output tokens | Median seconds per question | Total seconds | Cost ($) |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
-| 1 | S1 direct | 3 | 1 | 44579 | 258 | 1.21 | 25.8 | 0.1140 |
-| 1 | S2 think and vote (k = 5) | 15 | 0 | 222895 | 10466 | 8.78 | 177.9 | 0.6619 |
-| 1 | S3 tools | 20 | 0 | 63952 | 4349 | 5.12 | 103.2 | 0.2034 |
-| 2 | S1 direct | 2 | 1 | 44579 | 263 | 1.23 | 26.2 | 0.1141 |
-| 2 | S2 think and vote (k = 5) | 16 | 0 | 222895 | 10141 | 8.72 | 174.8 | 0.6586 |
-| 2 | S3 tools | 19 | 0 | 64071 | 4509 | 5.18 | 101.2 | 0.2053 |
+| 1 | S1 direct | 3 | 1 | 44579 | 258 | 1.21 | 25.8 | 0.0461 |
+| 1 | S2 think and vote (k = 5) | 15 | 0 | 222895 | 10466 | 8.78 | 177.9 | 0.2857 |
+| 1 | S3 tools | 20 | 0 | 63952 | 4349 | 5.12 | 103.2 | 0.0900 |
+| 2 | S1 direct | 2 | 1 | 44579 | 263 | 1.23 | 26.2 | 0.0462 |
+| 2 | S2 think and vote (k = 5) | 16 | 0 | 222895 | 10141 | 8.72 | 174.8 | 0.2837 |
+| 2 | S3 tools | 19 | 0 | 64071 | 4509 | 5.18 | 101.2 | 0.0911 |
 
-Prices used for the cost column: $2.5 per 1M input tokens and $10.0 per 1M output tokens.
+Prices used for the cost column: $1.0 per 1M input tokens and $6.0 per 1M output tokens.
 
 **Per question (run 1):**
 
@@ -303,7 +303,7 @@ I would use **S3 (tools)**. Run 1 / run 2: 20/20 and 19/20 correct against 15/20
 1. When the model sends a `tool_calls` message, **nothing has run yet.** The model only produced text that says "please call `lookup` with these arguments". My code (`run_tool`) runs the function and sends the result back as a `tool` message.
 2. `arguments` is a string because the model generates text, and the API passes the JSON as it was written. It can be invalid JSON, have a missing key or an extra key, or be of the wrong type. If I passed it straight into my function, I would get a `TypeError` or `KeyError` crash, or the model could pick any argument. So `run_tool` does `json.loads`, checks that the result is an object, and returns an error message (as a tool result) when something is wrong.
 3. The two tool definitions add **485 tokens** to every S3 request (measured with `extras.py`: one call with the tools and one without, difference of `usage.prompt_tokens`). A second sign: replacing my `lookup` description with the 3-word vague one saved about 160 tokens per request (Q-09: 3691 → 3055 over 4 calls).
-4. S2 used 222895 input tokens against 44579 for S1 in run 1 (5.0×) and 10466 output tokens against 258 (40.6×). The cost ratio S2/S1 was 5.80× in run 1 and 5.77× in run 2 (from `cost.py`, at $2.5 per 1M input and $10.0 per 1M output tokens), and S2 took 6.9× more time (177.9 s against 25.8 s). The reason is that S2 sends the whole document set 5 times per question and writes a long step-by-step answer 5 times, while S1 writes only the answer line.
+4. S2 used 222895 input tokens against 44579 for S1 in run 1 (5.0×) and 10466 output tokens against 258 (40.6×). The cost ratio S2/S1 was 6.19× in run 1 and 6.15× in run 2 (from `cost.py`, at $1.0 per 1M input and $6.0 per 1M output tokens), and S2 took 6.9× more time (177.9 s against 25.8 s). The reason is that S2 sends the whole document set 5 times per question and writes a long step-by-step answer 5 times, while S1 writes only the answer line.
 5. No single question: many questions tied at the maximum of **4 rounds** in both runs (for example Q-01, Q-03, Q-04, Q-07 and Q-09 in run 1), and no question needed more (`extras.py`). The model asks all the lookups of one step in a single round (parallel tool calls), then the calculations, then the last combination, and then it answers, which makes 4 API calls. Q-20 had the most tool calls (10 in run 1) but still only 4 rounds, because its calls were sent in parallel.
 6. With 100,000 documents I would not read every document with regular expressions when the program starts. I would build an index: a table of (entity, field, value, source, status) filled once, with the "archived" and "corrected by" information as columns, so that old data can be filtered by the database, plus a search index (keyword or embedding) that returns only the top few short snippets for a phrase. The tool must still return a limited amount of text and the source of each fact.
 7. `calculate` parses the text with `ast.parse(mode="eval")` and walks the tree; it accepts only numbers, `+ - * / **` and unary plus or minus, so names, calls, attributes, strings and `__import__` are refused before anything runs. It also limits the length (200), the exponent (100) and the size of the result (1e15), and my tests check `__import__('os').system('echo hi')`, `(1).__class__` and `9**9**9`. The model can still make it misbehave in the sense of wrong use: a wrong formula, wrong numbers copied into it, or many pointless calls (stopped only by the round limit). The tool cannot know that an expression is meaningless.
