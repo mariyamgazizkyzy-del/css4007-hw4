@@ -1,6 +1,6 @@
 # HW4 — submission
 
-**AI assistance:** Claude (Anthropic) helped me plan Part A (steps, tool definitions, the Q-09 walkthrough) and will help with code and review. I read and checked the plan myself.
+**AI assistance:** I used Claude (Anthropic) to help plan Part A (steps, tool definitions, the Q-09 walkthrough) and to write and review the code (`tools.py`, `tests/`, `strategies.py`, `run.py`). I read and checked the plan and the code myself, ran everything on my own computer with my own API key, and the numbers in the tables come from my own runs in `outputs/`.
 
 ---
 
@@ -163,85 +163,26 @@ Another split: **one tool per calculation** (`density(a, b)`, `growth_pct(distri
 
 ### What I changed from Part A while coding
 
-<!-- what changed in your plan, and why. "None" is an answer too. -->
+- The two tool definitions are the same as in A2 (same names, descriptions, parameters).
+- I added a small `run_tool(name, arguments)` function in `tools.py`. It is step 4 (Dispatch) from A1: it parses the `arguments` JSON string, checks it is an object, and calls `lookup` or `calculate`; on bad input it returns an error JSON instead of crashing.
+- I set `reasoning_effort="none"` for all three strategies. The API refused to use function tools with `gpt-5.6-luna` in Chat Completions when reasoning was on (error 400), so I fixed it to `"none"` everywhere to keep the comparison fair. In S2 the step-by-step thinking comes from the prompt.
+- Water use from `lookup` is in m³ per year for every district (as planned in A1); I wrote the unit conversion into the `source` field.
 
 ### B2 — Tests
 
 ```text
-<!-- pytest output -->
+============================== test session starts ===============================
+platform win32 -- Python 3.14.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\Huawei\Downloads\css4007-hw4
+plugins: anyio-4.15.1, platformdirs-4.12.2
+collected 24 items
+
+tests\test_tools.py ........................                                [100%]
+
+=============================== 24 passed in 0.09s ===============================
 ```
 
 ### B3 — The loop
 
-- Round limit, and why:
-- Where the logs are:
-- Real Q-09 conversation compared with my A3 version, what is different:
-
-### B4 — Three strategies
-
-**What I kept the same:**
-
-<!-- model, temperature, k, prompts, answer format, anything else -->
-
-**My rule for a correct answer** (written before the first full run):
-
-| Run | Strategy | Correct /20 | Unanswered | Input tokens | Output tokens | Median seconds per question | Total seconds | Cost ($) |
-|---|---|---:|---:|---:|---:|---:|---:|---:|
-| 1 | S1 direct | | | | | | | |
-| 1 | S2 think and vote (k = ) | | | | | | | |
-| 1 | S3 tools | | | | | | | |
-| 2 | S1 direct | | | | | | | |
-| 2 | S2 think and vote (k = ) | | | | | | | |
-| 2 | S3 tools | | | | | | | |
-
-**Per question (run 1):**
-
-| Question | S1 | S2 | S3 |
-|---|:---:|:---:|:---:|
-| Q-01 | | | |
-| Q-02 | | | |
-| Q-03 | | | |
-| Q-04 | | | |
-| Q-05 | | | |
-| Q-06 | | | |
-| Q-07 | | | |
-| Q-08 | | | |
-| Q-09 | | | |
-| Q-10 | | | |
-| Q-11 | | | |
-| Q-12 | | | |
-| Q-13 | | | |
-| Q-14 | | | |
-| Q-15 | | | |
-| Q-16 | | | |
-| Q-17 | | | |
-| Q-18 | | | |
-| Q-19 | | | |
-| Q-20 | | | |
-
----
-
-## Part C — Explain and choose (Hard)
-
-### C1 — Does the tool description matter?
-
-| Question | Calls (your description) | Calls (vague) | Answer (yours) | Answer (vague) |
-|---|---:|---:|---|---|
-| | | | | |
-
-### C2 — Three mistakes explained
-
-### C3 — Which strategy I would use, and what would change it
-
-### C4 — How sure I can be
-
-### Final questions
-
-1.
-2.
-3.
-4.
-5.
-6.
-7.
-8.
+- Round limit, and why: **12 rounds** (`MAX_ROUNDS` in `strategies.py`). By hand (A3), Q-09 needs 3 rounds with parallel tool calls and the hardest questions need more, so 12 leaves room for a model that calls tools one by one, but it still stops a model that loops forever and wastes tokens. If the limit is reached, the question is marked unanswered.
+- Where the logs are: `outputs/logs/run<N>_S3_<question id>.json` (every tool call with its inputs, result and seconds, plus tokens and seconds of
