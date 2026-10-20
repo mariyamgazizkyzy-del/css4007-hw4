@@ -1,6 +1,6 @@
 # HW4 — submission
 
-**AI assistance:** I used Claude (Anthropic) to help plan Part A (steps, tool definitions, the Q-09 walkthrough), to write and review the code (`tools.py`, `tests/`, `strategies.py`, `run.py`, `cost.py`, `extras.py`) and to draft the explanations in Part C. I ran all the code on my own computer with my own API key. Every number below comes from my own runs, saved in `outputs/`.
+**AI assistance:** I used Claude (Anthropic) to help plan Part A (steps, tool definitions, the Q-09 walkthrough), to write and review the code (`tools.py`, `tests/`, `strategies.py`, `run.py`, `cost.py`, `extras.py`, `patch_submission.py`, `set_prices.py`) and to draft the explanations in Part C. I ran all the code on my own computer with my own API key. Every number below comes from my own runs, saved in `outputs/`.
 
 ---
 
@@ -268,7 +268,15 @@ The only different answer is Q-18, where the vague version wrote `millbrook` ins
 
 **S1 — Q-09 (run 1): wrong.** Log line: `run1_S1 Q-09: BAD predicted=('brightwater', 1.6) expected=['Millbrook', 0.6] ... out=12`. The model wrote only 12 output tokens, which is just the `ANSWER:` line, so it had no place to do any step of the calculation (two divisions and a subtraction). The number is a guess made in one pass. Evidence that it is a guess and not a small slip: in run 2 the same question gave `('brightwater', 1.5894)`, and Q-06 (a sum of two populations) gave 14117 in run 1 and 1317 in run 2, while the correct value is 14069. The model also does not know it is guessing, so it does not say so.
 
-**S2 — Q-17 (both runs): wrong.** Log lines: run 1 `predicted=('harrowfield', 888.9228)`, run 2 `predicted=('harrowfield', 887.8973)`, expected 884 (S3 got 884.4572). The name is right and the number is about 0.4–0.6% too high both times. Q-05 (14327.583 and 14332.8 against 14235) and Q-20 (2998.16 and 2998.67 against 2993) fail in the same way in both runs. My explanation (a hypothesis, which I can check in `final_text` of these questions in `outputs/run1_S2.json`): with step-by-step thinking the model does multi-digit divisions and multiplications by hand and rounds the intermediate values (for example water per resident), so the error is almost the same in every sample. Voting over 5 samples removes the random differences between samples, but when all 5 samples make the same rounding error the most common answer is still wrong. So voting fixed some questions (Q-12 and Q-18 were wrong in run 1 and right in run 2) but not Q-05, Q-17, Q-20.
+**S2 — Q-17 (both runs): wrong.** Log lines: run 1 `predicted=('harrowfield', 888.9228)`, run 2 `predicted=('harrowfield', 887.8973)`, expected 884 (S3 got 884.4572). The reasoning saved in `outputs/run1_S2.json` (`final_text` of Q-17) shows what happened:
+
+```text
+Harrowfield water cost per resident = 7,146,000 × 142.35 ÷ 90,212 = 11,278.3973 tenge
+Ossbridge water cost per resident = 3,862,000 × 142.35 ÷ 52,904 = 10,389.4745 tenge
+Difference = 888.9228 tenge per resident
+```
+
+The set-up is right (correct water use, populations, tariff and formula), but the arithmetic is wrong. I checked it with Python: 7,146,000 × 142.35 ÷ 90,212 = 11,276.03 (not 11,278.40) and 3,862,000 × 142.35 ÷ 52,904 = 10,391.57 (not 10,389.47), so the true difference is 884.46, the same as S3. The model wrote numbers with four decimals that look exact but are wrong already in the units digit: it did a big multiplication and a long division in text, with no calculator. (My first guess was that rounding of intermediate values caused it; the log shows that the formula and the inputs were fine and the digits of the division were not.) Voting over 5 samples helps when the wrong samples are different and the right value is the most common one; here the answers of the two runs are both a few tenge too high, and Q-05 (14327.583 and 14332.8 against 14235) and Q-20 (2998.16 and 2998.67 against 2993) also have wrong answers that are close to each other in both runs (I did not read the reasoning of these two). So voting fixed some questions (Q-12 and Q-18 were wrong in run 1 and right in run 2) but not Q-05, Q-17, Q-20.
 
 **S3 — Q-18 (run 2): wrong, and the tools were not the problem.** Final text from `outputs/run2_S3.json`: "2030 projection: 40,013.3914 residents. Yes, it would exceed 40,000 residents." and then `ANSWER: Millbrook | 40013.3914`. The number is right (it came from `calculate`), and the text says "Yes", but the last line has a district name where my rule needs `yes`. The question asks both a yes/no and a number, and my prompt says "district name or yes/no", so the model sometimes chose the name. In run 1 the same question was right (`yes`), so it is sampling noise in the last line. S1 made the same name mistake on Q-18 in run 2. Tools cannot fix a formatting choice.
 
